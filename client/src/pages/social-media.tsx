@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import axios from "axios";
 import Sidebar from "@/components/layout/sidebar";
 import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
@@ -30,14 +31,35 @@ const itemVariants = {
 export default function SocialMedia() {
   const [selectedPeriod, setSelectedPeriod] = useState("7");
   const [selectedCategory, setSelectedCategory] = useState("social");
+  const [socialData, setSocialData] = useState<any>(null);
 
   const { data: analyses, isLoading } = useQuery({
     queryKey: ['/api/analyses'],
   });
 
+  const { data: instagramData, isLoading: isLoadingInstagram } = useQuery({
+    queryKey: ['instagram'],
+    queryFn: async () => {
+      const response = await axios.get("https://instagram-data1.p.rapidapi.com/user/info", {
+        headers: {
+          'x-rapidapi-key': process.env.INSTAGRAM_API,
+          'x-rapidapi-host': 'instagram-data1.p.rapidapi.com'
+        },
+        params: { username: 'instagram' }
+      });
+      return response.data;
+    }
+  });
+
+  useEffect(() => {
+    if (instagramData) {
+      setSocialData(instagramData);
+    }
+  }, [instagramData]);
+
   const latestAnalysis = Array.isArray(analyses) ? analyses[0] : undefined;
 
-  const socialMetrics = [
+  const socialMetrics = socialData ? [
     {
       title: "Social Score",
       value: latestAnalysis?.socialScore || 0,
@@ -49,7 +71,7 @@ export default function SocialMedia() {
     },
     {
       title: "Total Followers",
-      value: 12400,
+      value: socialData.followers,
       change: 8,
       trend: "up" as const,
       icon: "fas fa-users",
@@ -74,51 +96,25 @@ export default function SocialMedia() {
       color: "chart-3",
       description: "Monthly social media reach"
     }
-  ];
+  ] : [];
 
-  const platformData = [
+  const platformData = socialData ? [
+    { platform: "Instagram", followers: socialData.followers, engagement: "4.1%", posts: socialData.posts, growth: -2 },
     { platform: "Facebook", followers: "5.2K", engagement: "3.8%", posts: 12, growth: 5 },
     { platform: "Twitter", followers: "3.1K", engagement: "5.2%", posts: 18, growth: 12 },
-    { platform: "Instagram", followers: "2.8K", engagement: "4.1%", posts: 15, growth: -2 },
     { platform: "LinkedIn", followers: "1.3K", engagement: "3.5%", posts: 8, growth: 8 }
-  ];
+  ] : [];
 
-  const recentPosts = [
-    { 
-      platform: "Twitter", 
-      content: "Just launched our new analytics dashboard! 🚀", 
-      likes: 45, 
-      shares: 12, 
-      comments: 8,
-      time: "2 hours ago" 
-    },
-    { 
-      platform: "LinkedIn", 
-      content: "5 SEO tips that transformed our rankings", 
-      likes: 67, 
-      shares: 23, 
-      comments: 15,
-      time: "5 hours ago" 
-    },
-    { 
-      platform: "Facebook", 
-      content: "Behind the scenes of our development process", 
-      likes: 34, 
-      shares: 8, 
-      comments: 12,
-      time: "1 day ago" 
-    },
-    { 
-      platform: "Instagram", 
-      content: "Office vibes and team collaboration 📊", 
-      likes: 89, 
-      shares: 6, 
-      comments: 21,
-      time: "2 days ago" 
-    }
-  ];
+  const recentPosts = socialData ? socialData.latest_posts.map((post: any) => ({
+    platform: "Instagram",
+    content: post.caption,
+    likes: post.likes,
+    shares: 0,
+    comments: post.comments,
+    time: "2 hours ago"
+  })) : [];
 
-  if (isLoading) {
+  if (isLoading || isLoadingInstagram) {
     return (
       <div className="flex h-screen">
         <Sidebar />
