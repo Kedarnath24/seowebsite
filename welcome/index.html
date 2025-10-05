@@ -29,8 +29,43 @@
     </main>
 
     <script>
-        document.getElementById('getStartedBtn').addEventListener('click', function() {
-            window.location.href = 'http://localhost:5173';
+        document.getElementById('getStartedBtn').addEventListener('click', function(e) {
+            e.preventDefault();
+
+            // 1. Create and show the feedback message
+            const feedback = document.createElement('div');
+            feedback.textContent = 'Welcome! Loading your experience...';
+            feedback.style.cssText = `
+                position: fixed;
+                top: 30px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: linear-gradient(135deg, #10b981 0%, #06b6d4 100%);
+                color: white;
+                padding: 16px 24px;
+                border-radius: 12px;
+                font-size: 16px;
+                font-weight: 500;
+                z-index: 1000;
+                opacity: 0;
+                transform: translateX(-50%) translateY(-20px);
+                transition: all 0.4s ease-out;
+                box-shadow: 0 8px 30px rgba(16, 185, 129, 0.4);
+                text-align: center;
+                min-width: 280px;
+            `;
+            document.body.appendChild(feedback);
+
+            // Animate the feedback message in
+            setTimeout(() => {
+                feedback.style.opacity = '1';
+                feedback.style.transform = 'translateX(-50%) translateY(0)';
+            }, 10);
+
+            // 2. Wait for 2 seconds, then navigate
+            setTimeout(() => {
+                window.location.href = 'http://localhost:5173';
+            }, 2000);
         });
     </script>
 </body>
