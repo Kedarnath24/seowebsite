@@ -23,7 +23,7 @@ function Router() {
   return (
     <Switch>
       <Route path="/" component={Dashboard} />
-      <Route path="/seo" component={SEORankings} />
+      <Route path="/seo-rankings" component={SEORankings} />
       <Route path="/brand" component={BrandRankings} />
       <Route path="/social" component={SocialMedia} />
       <Route path="/performance" component={Performance} />

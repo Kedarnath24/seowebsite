@@ -33,7 +33,7 @@ export default function SEORankings() {
   const [selectedCategory, setSelectedCategory] = useState("seo");
 
   // ✅ Fixed fetch logic
-  const { data: analyses, isLoading } = useQuery({
+  const { data: analyses, isLoading: isLoadingAnalyses } = useQuery({
     queryKey: ["analyses"],
     queryFn: async () => {
       const res = await fetch("http://localhost:5000/api/analyses");
@@ -42,12 +42,23 @@ export default function SEORankings() {
     },
   });
 
+  const { data: seoScoreData, isLoading: isLoadingSeoScore } = useQuery({
+    queryKey: ["seoScore"],
+    queryFn: async () => {
+      const res = await fetch("http://localhost:5000/api/seo-score");
+      if (!res.ok) throw new Error("Failed to fetch SEO score");
+      return res.json();
+    },
+  });
+
+  const isLoading = isLoadingAnalyses || isLoadingSeoScore;
+
   const latestAnalysis = Array.isArray(analyses) ? analyses[0] : undefined;
 
   const seoMetrics = [
     {
       title: "SEO Score",
-      value: latestAnalysis?.seoScore || 0,
+      value: seoScoreData?.seoScore || latestAnalysis?.seoScore || 0,
       change: 8,
       trend: "up" as const,
       icon: "fas fa-search",

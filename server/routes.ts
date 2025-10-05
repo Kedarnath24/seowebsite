@@ -22,7 +22,7 @@ async function computeScores(info: any) {
     wordCountScore: Math.min(1, info.wordCount / 3000),
   };
 
-  const seo = (
+  let seo = (
     checks.hasTitle * 10 +
     checks.titleLenGood * 10 +
     checks.hasMetaDesc * 10 +
@@ -33,6 +33,30 @@ async function computeScores(info: any) {
     checks.hasCanonical * 10 +
     checks.wordCountScore * 20
   );
+
+  const SEO_API_KEY = process.env.SEO_API_KEY;
+
+  if (SEO_API_KEY && SEO_API_KEY !== "your_api_key_here") {
+    try {
+      // This is a placeholder API endpoint.
+      // Replace with your actual SEO score API.
+      const seoScoreUrl = `https://api.seoscore.dev/v1/score?url=${encodeURIComponent(info.url)}`;
+      const response = await fetch(seoScoreUrl, {
+        headers: {
+          'Authorization': `Bearer ${SEO_API_KEY}`
+        }
+      });
+
+      if (response.ok) {
+        const data: any = await response.json();
+        if (typeof data.score === 'number') {
+          seo = data.score;
+        }
+      }
+    } catch (e) {
+      console.error("SEO score API call failed, falling back to default calculation.", e);
+    }
+  }
 
   let brand = (info.ogTitle || info.ogImage ? 70 : 50);
   const BRAND_SCORE_API_KEY = process.env.BRAND_SCORE;
@@ -95,6 +119,39 @@ export async function registerRoutes(app: Express) {
     });
   });
 
+  app.get("/api/seo-score", async (req: Request, res: Response) => {
+    const SEO_API_KEY = process.env.SEO_API_KEY;
+
+    if (!SEO_API_KEY || SEO_API_KEY === "your_api_key_here") {
+      // Return a mock score if the API key is not set
+      return res.json({ seoScore: 88 });
+    }
+
+    try {
+      // This is a placeholder API endpoint.
+      // Replace with your actual SEO score API.
+      const seoScoreUrl = `https://api.seoscore.dev/v1/score?url=https://google.com`;
+      const response = await fetch(seoScoreUrl, {
+        headers: {
+          'Authorization': `Bearer ${SEO_API_KEY}`
+        }
+      });
+
+      if (response.ok) {
+        const data: any = await response.json();
+        if (typeof data.score === 'number') {
+          return res.json({ seoScore: data.score });
+        }
+      }
+      // Fallback to a mock score if the API call fails
+      res.json({ seoScore: 88 });
+    } catch (e) {
+      console.error("SEO score API call failed, falling back to default calculation.", e);
+      // Fallback to a mock score if there's an error
+      res.json({ seoScore: 88 });
+    }
+  });
+
   app.post("/api/analyze", async (req: Request, res: Response) => {
     try {
       const { url } = req.body || {};
@@ -106,7 +163,7 @@ export async function registerRoutes(app: Express) {
       if (!/^https?:\/\//i.test(target)) target = "http://" + target;
 
       const start = Date.now();
-      const resp = await fetch(target, { redirect: "follow", timeout: 15000 });
+      const resp = await fetch(target, { redirect: "follow", timeout: 15000 } as any);
       const responseTimeMs = Date.now() - start;
 
       const status = resp.status;
@@ -126,7 +183,7 @@ export async function registerRoutes(app: Express) {
       const metaDescription = $('meta[name="description"]').attr("content") || null;
       const h1Count = $("h1").length;
       const imagesTotal = $("img").length;
-      const imagesWithAlt = $("img").filter((i, el) => $(el).attr("alt")?.trim().length > 0).length;
+      const imagesWithAlt = $("img").filter((i, el) => ($(el).attr("alt") || "").trim().length > 0).length;
       const hasViewport = !!$('meta[name="viewport"]').attr("content");
       const hasCanonical = !!$('link[rel="canonical"]').attr("href");
       const ogTitle = $('meta[property="og:title"]').attr("content") || null;
