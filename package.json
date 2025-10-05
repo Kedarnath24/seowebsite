@@ -4,7 +4,7 @@
   "type": "module",
   "license": "MIT",
   "scripts": {
-    "dev:server": "cross-env NODE_ENV=development tsx server/index.ts",
+    "dev:server": "kill-port 5000 && cross-env NODE_ENV=development tsx server/index.ts",
     "dev:client": "vite --config vite.client.config.ts",
     "dev:welcome": "vite --config vite.welcome.config.ts",
     "build:client": "vite build",
@@ -120,6 +120,7 @@
     "cross-env": "^10.0.0",
     "drizzle-kit": "^0.31.5",
     "esbuild": "^0.25.0",
+    "kill-port": "^2.0.1",
     "postcss": "^8.4.47",
     "tailwindcss": "^3.4.17",
     "tsx": "^4.19.1",

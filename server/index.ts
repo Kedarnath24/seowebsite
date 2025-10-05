@@ -51,4 +51,17 @@ app.use((req, res, next) => {
   server.listen(listenOptions, () => {
     log(`serving on port ${port}`);
   });
+
+  const gracefulShutdown = (signal: string) => {
+    process.on(signal, () => {
+      log(`Received ${signal}, shutting down...`, "express");
+      server.close(() => {
+        log("Server closed.", "express");
+        process.exit(0);
+      });
+    });
+  };
+
+  gracefulShutdown("SIGINT");
+  gracefulShutdown("SIGTERM");
 })();
