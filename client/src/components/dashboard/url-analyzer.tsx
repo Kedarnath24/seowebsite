@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -10,7 +9,6 @@ import { Form, FormControl, FormField, FormItem, FormMessage } from "@/component
 import { Search, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { useLocation } from "wouter";
 
 const urlSchema = z.object({
@@ -29,7 +27,6 @@ type UrlFormData = z.infer<typeof urlSchema>;
 export default function URLAnalyzer() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [lastResult, setLastResult] = useState<any>(null);
   const [, setLocation] = useLocation();
 
   const form = useForm<UrlFormData>({
@@ -55,8 +52,6 @@ export default function URLAnalyzer() {
       title: "Analysis Complete",
       description: `Successfully analyzed ${data.url}`,
     });
-
-    setLastResult(data); // <-- add this state if you want to show latest analysis
 
     queryClient.invalidateQueries({ queryKey: ["/api/analyses"] });
 
@@ -141,34 +136,6 @@ export default function URLAnalyzer() {
             </Button>
           </form>
         </Form>
-
-        {/* ✅ Show last analysis result */}
-        {lastResult && (
-          <Card className="mt-6">
-            <CardHeader>
-              <CardTitle>Latest Analysis Result</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p>
-                <strong>URL:</strong> {lastResult.url}
-              </p>
-              {lastResult.seoScore !== undefined && (
-                <p>
-                  <strong>SEO Score:</strong> {lastResult.seoScore}
-                </p>
-              )}
-              {lastResult.wordCount !== undefined && (
-                <p>
-                  <strong>Word Count:</strong> {lastResult.wordCount}
-                </p>
-              )}
-              <p>
-                <strong>Created At:</strong>{" "}
-                {new Date(lastResult.createdAt).toLocaleString()}
-              </p>
-            </CardContent>
-          </Card>
-        )}
       </div>
     </div>
   );

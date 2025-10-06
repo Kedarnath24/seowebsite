@@ -1,0 +1,17 @@
+
+> rest-express@1.0.0 dev
+> concurrently "npm:dev:server" "npm:dev:client" "npm:dev:welcome"
+
+[dev:welcome]
+[dev:welcome] > rest-express@1.0.0 dev:welcome
+[dev:welcome] > vite --config vite.welcome.config.ts
+[dev:welcome]
+[dev:server]
+[dev:server] > rest-express@1.0.0 dev:server
+[dev:server] > kill-port 5000 && cross-env NODE_ENV=development tsx server/index.ts
+[dev:server]
+[dev:client]
+[dev:client] > rest-express@1.0.0 dev:client
+[dev:client] > vite --config vite.client.config.ts
+[dev:client]
+[dev:server] Process on port 5000 killed
