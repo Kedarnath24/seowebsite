@@ -24,7 +24,7 @@ const navigationItems = [
   },
   {
     title: "SEO Rankings", 
-    href: "/seo",
+    href: "/seo-rankings",
     icon: Search,
     shortTitle: "SEO"
   },
