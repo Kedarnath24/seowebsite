@@ -9,6 +9,7 @@ import RankingTrendsChart from "@/components/dashboard/ranking-trends-chart";
 import PerformanceMetrics from "@/components/dashboard/performance-metrics";
 import DetailedRankingsTable from "@/components/dashboard/detailed-rankings-table";
 import InsightsSection from "@/components/dashboard/insights-section";
+import EmptyDashboard from "@/components/dashboard/empty-dashboard";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 
@@ -105,44 +106,48 @@ export default function Dashboard() {
         />
         
         <main className="flex-1 overflow-auto p-6">
-          <motion.div 
-            variants={containerVariants}
-            initial="hidden"
-            animate="visible"
-            className="space-y-8"
-          >
-            {/* Key Metrics Grid */}
-            <motion.div 
-              variants={itemVariants}
-              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
+          {!latestAnalysis ? (
+            <EmptyDashboard />
+          ) : (
+            <motion.div
+              variants={containerVariants}
+              initial="hidden"
+              animate="visible"
+              className="space-y-8"
             >
-              {metricCards.map((card, index) => (
-                <MetricCard key={index} {...card} />
-              ))}
-            </motion.div>
+              {/* Key Metrics Grid */}
+              <motion.div
+                variants={itemVariants}
+                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
+              >
+                {metricCards.map((card, index) => (
+                  <MetricCard key={index} {...card} />
+                ))}
+              </motion.div>
 
-            {/* Charts Section */}
-            <motion.div 
-              variants={itemVariants}
-              className="grid grid-cols-1 lg:grid-cols-2 gap-6"
-            >
-              <RankingTrendsChart period={selectedPeriod} />
-              <PerformanceMetrics analysis={latestAnalysis} />
-            </motion.div>
+              {/* Charts Section */}
+              <motion.div
+                variants={itemVariants}
+                className="grid grid-cols-1 lg:grid-cols-2 gap-6"
+              >
+                <RankingTrendsChart period={selectedPeriod} />
+                <PerformanceMetrics analysis={latestAnalysis} />
+              </motion.div>
 
-            {/* Detailed Rankings Table */}
-            <motion.div variants={itemVariants}>
-              <DetailedRankingsTable 
-                analysis={latestAnalysis}
-                category={selectedCategory}
-              />
-            </motion.div>
+              {/* Detailed Rankings Table */}
+              <motion.div variants={itemVariants}>
+                <DetailedRankingsTable
+                  analysis={latestAnalysis}
+                  category={selectedCategory}
+                />
+              </motion.div>
 
-            {/* Additional Insights */}
-            <motion.div variants={itemVariants}>
-              <InsightsSection analysis={latestAnalysis} />
+              {/* Additional Insights */}
+              <motion.div variants={itemVariants}>
+                <InsightsSection analysis={latestAnalysis} />
+              </motion.div>
             </motion.div>
-          </motion.div>
+          )}
         </main>
         
         <Footer />
