@@ -44,16 +44,36 @@ export default function SEORankings() {
 
   const latestAnalysis = Array.isArray(analyses) ? analyses[0] : undefined;
 
-  const { data: seoScoreData, isLoading: isLoadingSeoScore } = useQuery({
+  const { data: seoScore, isLoading: isLoadingSeoScore } = useQuery({
     queryKey: ["seoScore", latestAnalysis?.url],
     queryFn: async () => {
-      // ✅ Important: only fetch if url exists
-      if (!latestAnalysis?.url) return { seoScore: 0 };
-      const res = await fetch(`http://localhost:5000/api/seo-score?url=${encodeURIComponent(latestAnalysis.url)}`);
-      if (!res.ok) throw new Error("Failed to fetch SEO score");
-      return res.json();
+      if (!latestAnalysis?.url) return null;
+      const response = await fetch("https://api.seranking.com/v2", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Token 9eb006d8-4445-f560-818c-c736005b7298",
+        },
+        body: JSON.stringify({
+          jsonrpc: "2.0",
+          id: 1,
+          method: "audit.get",
+          params: {
+            url: latestAnalysis.url,
+          },
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch SEO score");
+      }
+
+      const data = await response.json();
+      if (data.error) {
+        throw new Error(data.error.message);
+      }
+      return data.result.score;
     },
-    // ✅ Important: only run query if url is available
     enabled: !!latestAnalysis?.url,
   });
 
@@ -62,8 +82,8 @@ export default function SEORankings() {
   const seoMetrics = [
     {
       title: "SEO Score",
-      value: seoScoreData?.seoScore || 0,
-      change: 8,
+      value: seoScore || 0,
+      change: 0,
       trend: "up" as const,
       icon: "fas fa-search",
       color: "primary",
