@@ -34,7 +34,7 @@ export default function SEORankings() {
 
   // ✅ Fixed fetch logic
   const { data: analyses, isLoading: isLoadingAnalyses } = useQuery({
-    queryKey: ["analyses"],
+    queryKey: ["/api/analyses"],
     queryFn: async () => {
       const res = await fetch("http://localhost:5000/api/analyses");
       if (!res.ok) throw new Error("Failed to fetch analyses");
@@ -42,23 +42,27 @@ export default function SEORankings() {
     },
   });
 
+  const latestAnalysis = Array.isArray(analyses) ? analyses[0] : undefined;
+
   const { data: seoScoreData, isLoading: isLoadingSeoScore } = useQuery({
-    queryKey: ["seoScore"],
+    queryKey: ["seoScore", latestAnalysis?.url],
     queryFn: async () => {
-      const res = await fetch("http://localhost:5000/api/seo-score");
+      // ✅ Important: only fetch if url exists
+      if (!latestAnalysis?.url) return { seoScore: 0 };
+      const res = await fetch(`http://localhost:5000/api/seo-score?url=${encodeURIComponent(latestAnalysis.url)}`);
       if (!res.ok) throw new Error("Failed to fetch SEO score");
       return res.json();
     },
+    // ✅ Important: only run query if url is available
+    enabled: !!latestAnalysis?.url,
   });
 
-  const isLoading = isLoadingAnalyses || isLoadingSeoScore;
-
-  const latestAnalysis = Array.isArray(analyses) ? analyses[0] : undefined;
+  const isLoading = isLoadingAnalyses || (!!latestAnalysis?.url && isLoadingSeoScore);
 
   const seoMetrics = [
     {
       title: "SEO Score",
-      value: seoScoreData?.seoScore || latestAnalysis?.seoScore || 0,
+      value: seoScoreData?.seoScore || 0,
       change: 8,
       trend: "up" as const,
       icon: "fas fa-search",

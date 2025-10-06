@@ -34,7 +34,7 @@ async function computeScores(info: any) {
     checks.wordCountScore * 20
   );
 
-  const SEO_API_KEY = process.env.SEO_API_KEY;
+  const SEO_API_KEY = process.env.SEO_SCORE;
 
   if (SEO_API_KEY && SEO_API_KEY !== "your_api_key_here") {
     try {
@@ -120,7 +120,8 @@ export async function registerRoutes(app: Express) {
   });
 
   app.get("/api/seo-score", async (req: Request, res: Response) => {
-    const SEO_API_KEY = process.env.SEO_API_KEY;
+    const SEO_API_KEY = process.env.SEO_SCORE;
+    const url = req.query.url as string || 'https://google.com';
 
     if (!SEO_API_KEY || SEO_API_KEY === "your_api_key_here") {
       // Return a mock score if the API key is not set
@@ -130,7 +131,7 @@ export async function registerRoutes(app: Express) {
     try {
       // This is a placeholder API endpoint.
       // Replace with your actual SEO score API.
-      const seoScoreUrl = `https://api.seoscore.dev/v1/score?url=https://google.com`;
+      const seoScoreUrl = `https://api.seoscore.dev/v1/score?url=${encodeURIComponent(url)}`;
       const response = await fetch(seoScoreUrl, {
         headers: {
           'Authorization': `Bearer ${SEO_API_KEY}`
